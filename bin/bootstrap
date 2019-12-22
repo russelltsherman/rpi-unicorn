@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+# allow for automated install of xcode cli tools and git clone of baseline repo
+
+set -o errtrace
+set -o functrace
+set -o errexit
+set -o nounset
+set -o pipefail
+
+gitreponame="rpi-unicorn" # the name of the git project repo
+gitusername="russelltsherman" # the name of the git user to fetch repo from
+gitrepobranch="master" # repo branch to checkout
+packages=(
+  git 
+)
+
+echo ""
+echo "#######################################################################"
+echo "install apt packages $packages"
+echo "#######################################################################"
+sudo apt install -y "$packages"
+
+echo ""
+echo "#######################################################################"
+echo "clone or update repo"
+echo "#######################################################################"
+if [ -d  "${HOME}/${gitreponame}" ]
+then
+  # repo clone exists.. update
+  ( cd "${HOME}/${gitreponame}" || exit; git pull --rebase )
+else
+  # clone repo
+  git clone "https://github.com/${gitusername}/${gitreponame}" "${HOME}/$gitreponame"
+fi
+
+echo ""
+echo "#######################################################################"
+echo "execute bootstrap"
+echo "#######################################################################"
+make -C "${HOME}/${gitreponame}" bootstrap
